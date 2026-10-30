@@ -41,51 +41,47 @@ namespace ZombieParty.Controllers
         //}
 
 
-        ////GET CREATE
-        //public IActionResult Create()
-        //{
-        //    //ici pas grand intérêt à la mettre async
-        //    return View();
-        //}
+        //GET CREATE
+        public IActionResult Create()
+        {
+            //ici pas grand intérêt à la mettre async
+            return View();
+        }
 
-        ////POST
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create(ZombieType zombieType)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        // Ajouter à la BD
-        //       await  _baseDonnees.ZombieTypes.AddAsync(zombieType);
-        //        _baseDonnees.SaveChanges();
-        //        TempData[AppConstants.Success] = $"{zombieType.TypeName} zombie type added";
-        //        return this.RedirectToAction("Index");
-        //    }
+        //POST
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(ZombieType zombieType)
+        {
+            if (ModelState.IsValid)
+            {
+                // Ajouter à la BD
+                await _serviceZT.CreateAsync(zombieType);   // le SaveChangesAsync est déjà inclus
+                TempData[AppConstants.Success] = $"{zombieType.TypeName} zombie type added";
+                return this.RedirectToAction("Index");
+            }
 
-        //    return this.View(zombieType);
-        //}
+            return this.View(zombieType);
+        }
 
-        //public async Task<IActionResult> Edit(int id)
-        //{
-        //    ZombieType? zombieType = await _baseDonnees.ZombieTypes.FindAsync(id);
-            
-        //    return View(zombieType);
-        //}
+        public async Task<IActionResult> Edit(int id)
+        {
+            ZombieType? zombieType = await _serviceZT.GetByIdAsync(id);
+            return View(zombieType);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(ZombieType zombieType)
+        {
+            if (ModelState.IsValid)
+            {
+                await _serviceZT.EditAsync(zombieType);
+                TempData[AppConstants.Success] = $"ZombieType {zombieType.TypeName} has been modified";
+                return this.RedirectToAction("Index");
+            }
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit(ZombieType zombieType)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        _baseDonnees.ZombieTypes.Update(zombieType);
-        //       await _baseDonnees.SaveChangesAsync();
-        //        TempData[AppConstants.Success] = $"ZombieType {zombieType.TypeName} has been modified";
-        //        return this.RedirectToAction("Index");
-        //    }
-
-        //    return View(zombieType);
-        //}
+            return View(zombieType);
+        }
 
         //public async Task<IActionResult> Delete(int id)
         //{
