@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using ZombieParty.Models;
-using ZombieParty.Models.Data;
 using ZombieParty.Services;
 using ZombieParty.Utility;
 using ZombieParty.ViewModels;
@@ -26,25 +23,12 @@ namespace ZombieParty.Controllers
 
         //public async Task<IActionResult> Details(int id)
         //{
-        //    var zombies = await _baseDonnees.Zombies.Where(z => z.ZombieTypeId == id).ToListAsync();
-
-        //    ZombieTypeVM zombieTypeVM = new()
-        //    {
-        //        ZombieType = new(),
-        //        ZombiesList = zombies,
-        //        ZombiesCount = zombies.Count(),
-        //        PointsAverage = zombies.Average(p => p.Point)
-        //    };
-
-        //    zombieTypeVM.ZombieType = await _baseDonnees.ZombieTypes.FirstOrDefaultAsync(zt => zt.Id == id);
-        //    return View(zombieTypeVM);
+        //    ... (à faire plus tard avec IZombieService)
         //}
-
 
         //GET CREATE
         public IActionResult Create()
         {
-            //ici pas grand intérêt à la mettre async
             return View();
         }
 
@@ -55,7 +39,6 @@ namespace ZombieParty.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Ajouter à la BD
                 await _serviceZT.CreateAsync(zombieType);   // le SaveChangesAsync est déjà inclus
                 TempData[AppConstants.Success] = $"{zombieType.TypeName} zombie type added";
                 return this.RedirectToAction("Index");
@@ -69,6 +52,7 @@ namespace ZombieParty.Controllers
             ZombieType? zombieType = await _serviceZT.GetByIdAsync(id);
             return View(zombieType);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ZombieType zombieType)
@@ -83,31 +67,30 @@ namespace ZombieParty.Controllers
             return View(zombieType);
         }
 
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    ZombieType? zombieType = await _baseDonnees.ZombieTypes.FindAsync(id);
-        //    if (zombieType == null)
-        //    {
-        //        return NotFound();
-        //    }
+        public async Task<IActionResult> Delete(int id)
+        {
+            ZombieType? zombieType = await _serviceZT.GetByIdAsync(id);
+            if (zombieType == null)
+            {
+                return NotFound();
+            }
 
-        //    return View(zombieType);
-        //}
+            return View(zombieType);
+        }
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> DeletePost(int id)
-        //{
-        //    ZombieType? zombieType = await _baseDonnees.ZombieTypes.FindAsync(id);
-        //    if (zombieType == null)
-        //    {
-        //        return NotFound();
-        //    }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePost(int id)
+        {
+            ZombieType? zombieType = await _serviceZT.GetByIdAsync(id);
+            if (zombieType == null)
+            {
+                return NotFound();
+            }
 
-        //    _baseDonnees.ZombieTypes.Remove(zombieType);
-        //     await _baseDonnees.SaveChangesAsync();
-        //    TempData[AppConstants.Success] = $"ZombieType {zombieType.TypeName} has been removed";
-        //    return RedirectToAction("Index");
-        //}
+            await _serviceZT.DeleteAsync(id);
+            TempData[AppConstants.Success] = $"ZombieType {zombieType.TypeName} has been removed";
+            return RedirectToAction("Index");
+        }
     }
 }
